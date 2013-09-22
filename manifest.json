@@ -1,0 +1,11 @@
+{
+	"manifest_version":2,
+	"name":"toggl-tag-browser",
+	"description":"A tool for viewing toggl data by tag",
+	"version":"0.1",
+	"app": {
+		"background": {
+			"scripts": ["background.js"]
+		}
+	}
+}
