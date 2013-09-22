@@ -5,7 +5,7 @@
 	"version":"0.1",
 	"app": {
 		"background": {
-			"scripts": ["scripts/background.js"]
+			"scripts": ["js/background.js"]
 		}
 	},
 	"permissions": [
