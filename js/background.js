@@ -35,7 +35,7 @@ togglTags = function(callback) {
 }
 
 handleMessage = function(msg,sender,callback) {
-	console.log('Got message of type ' + msg.type !=== undefined ? msg.type : 'undefined');
+	console.log('Got message of type ' + msg.type !== undefined ? msg.type : 'undefined');
 	switch(msg.type) {
 		case 'entries':
 			togglEntries(msg.start, msg.stop, callback);
@@ -55,6 +55,13 @@ handleMessage = function(msg,sender,callback) {
 }
 
 chrome.app.runtime.onLaunched.addListener(function() {
-	togglRequest('GET','/me', function(resp) { console.log(JSON.parse(resp)); });
+	togglRequest('GET','/me', function(resp) { console.log(resp); });
 	chrome.runtime.onMessage.addListener(handleMessage);
+
+	chrome.app.window.create('html/main.html', {
+		'bounds':{
+			'width':800,
+			'height':400
+		}
+	});
 })
