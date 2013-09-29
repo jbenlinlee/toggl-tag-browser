@@ -9,10 +9,19 @@ function TagBrowserCtrl($scope) {
 	
 	$scope.entries = [];
 
+	function changeEntryRange(start,end) {
+		$scope.startDate = start;
+		$scope.startDateLabel = $scope.startDate.format($scope.entryRangeFormat);
+		$scope.endDate = end;
+		$scope.endDateLabel = $scope.endDate.format($scope.entryRangeFormat);
+	}
+
 	$(document).ready(function() {
 		$('div#reportrange').daterangepicker({
 			startDate:$scope.startDate,
 			endDate:$scope.endDate
+		}, function(start,end) { 
+			$scope.$apply(changeEntryRange(start,end));
 		});
 	});
 }
