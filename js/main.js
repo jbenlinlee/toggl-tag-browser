@@ -7,8 +7,9 @@ function TagBrowserCtrl($scope) {
 	$scope.entries = [];
 
 	console.log("TagBrowserCtrl instantiate");
+
+	$(document).ready(function() {
+		$('div#reportrange').daterangepicker();
+	});
 }
 
-$(document).ready(function() {
-	$('div#reportrange').daterangepicker();
-});
