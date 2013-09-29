@@ -1,4 +1,4 @@
 $(document).ready(function() {
 	console.log('document ready');
-	$('#entryrange').daterangepicker();
+	$('div#reportrange').daterangepicker();
 });
