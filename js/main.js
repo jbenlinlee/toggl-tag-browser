@@ -1,15 +1,19 @@
 function TagBrowserCtrl($scope) {
-	$scope.startDate = new Date();
-	$scope.startDateLabel = $scope.startDate.toDateString();
-	$scope.endDate = new Date();
-	$scope.endDateLabel = $scope.endDate.toDateString();
+	$scope.entryRangeFormat = 'ddd, MMM D YYYY';
+
+	$scope.startDate = moment().subtract('days',7);
+	$scope.startDateLabel = $scope.startDate.format($scope.entryRangeFormat);
+
+	$scope.endDate = moment();
+	$scope.endDateLabel = $scope.endDate.format($scope.entryRangeFormat);
 	
 	$scope.entries = [];
 
-	console.log("TagBrowserCtrl instantiate");
-
 	$(document).ready(function() {
-		$('div#reportrange').daterangepicker();
+		$('div#reportrange').daterangepicker({
+			startDate:$scope.startDate,
+			endDate:$scope.endDate
+		});
 	});
 }
 
