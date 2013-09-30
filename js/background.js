@@ -12,6 +12,8 @@ togglRequest = function(method,api,callback,data) {
 	} else {
 		xhr.send();
 	}
+
+	return true;
 }
 
 togglEntries = function(start,stop,callback) {
@@ -19,7 +21,7 @@ togglEntries = function(start,stop,callback) {
 	var date_stop = new Date(stop);
 	var call = '/time_entries?start_date=' + encodeURIComponent(date_start.toISOString()) + '&stop_date=' + encodeURIComponent(date_stop.toISOString());
 	console.log('Fetching entry list: start=' + date_start.toISOString() + ' stop=' + date_stop.toISOString());
-	togglRequest('GET', call, callback);
+	return togglRequest('GET', call, function(response) { callback({entries:response}) });
 }
 
 togglWorkspaces = function(callback) {
@@ -35,10 +37,11 @@ togglTags = function(callback) {
 }
 
 handleMessage = function(msg,sender,callback) {
-	console.log('Got message of type ' + msg.type !== undefined ? msg.type : 'undefined');
+	console.log('Got message of type ' + (msg.type !== undefined ? msg.type : 'undefined'));
+	console.log(msg);
 	switch(msg.type) {
 		case 'entries':
-			togglEntries(msg.start, msg.stop, callback);
+			return togglEntries(msg.start, msg.stop, callback);
 			break;
 		case 'workspaces':
 			togglWorkspaces(callback);

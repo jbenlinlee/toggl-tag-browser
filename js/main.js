@@ -9,11 +9,20 @@ function TagBrowserCtrl($scope) {
 	
 	$scope.entries = [];
 
+	function requestTimeEntries() {
+		chrome.runtime.sendMessage({type:'entries', start:$scope.startDate.valueOf(), stop:$scope.endDate.valueOf()},
+			function(response) {
+				console.log('Got ' + response.entries.length + ' entries');
+			});
+	}
+
 	function changeEntryRange(start,end) {
 		$scope.startDate = start;
 		$scope.startDateLabel = $scope.startDate.format($scope.entryRangeFormat);
 		$scope.endDate = end;
 		$scope.endDateLabel = $scope.endDate.format($scope.entryRangeFormat);
+		
+		requestTimeEntries();
 	}
 
 	$(document).ready(function() {
@@ -23,6 +32,8 @@ function TagBrowserCtrl($scope) {
 		}, function(start,end) { 
 			$scope.$apply(changeEntryRange(start,end));
 		});
+
+		requestTimeEntries();
 	});
 }
 
