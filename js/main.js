@@ -13,6 +13,7 @@ function TagBrowserCtrl($scope) {
 		chrome.runtime.sendMessage({type:'entries', start:$scope.startDate.valueOf(), stop:$scope.endDate.valueOf()},
 			function(response) {
 				console.log('Got ' + response.entries.length + ' entries');
+				$scope.$apply(function() { $scope.entries = response.entries });
 			});
 	}
 
