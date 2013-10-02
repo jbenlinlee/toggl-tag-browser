@@ -8,12 +8,35 @@ function TagBrowserCtrl($scope) {
 	$scope.endDateLabel = $scope.endDate.format($scope.entryRangeFormat);
 	
 	$scope.entries = [];
+	$scope.filteredEntries = [];
+	$scope.projects = [];
+	$scope.tags = [];
 
 	function requestTimeEntries() {
-		chrome.runtime.sendMessage({type:'entries', start:$scope.startDate.valueOf(), stop:$scope.endDate.valueOf()},
-			function(response) {
+		var msg = {type:'entries', start:$scope.startDate.valueOf(), stop:$scope.endDate.valueOf()};
+		chrome.runtime.sendMessage(msg, function(response) {
 				console.log('Got ' + response.entries.length + ' entries');
-				$scope.$apply(function() { $scope.entries = response.entries });
+				$scope.$apply(function() {
+					$scope.entries = response.entries;
+					var projects = {};
+					$scope.entries.forEach(function(entry) {
+						if (entry.duration > 0) {
+							if (projects[entry.pid] === undefined) {
+								projects[entry.pid] = entry.duration;
+							} else {
+								projects[entry.pid] += entry.duration;
+							}
+						}
+					});
+
+					var plotData = [];
+					for (var entry in projects) {
+						plotData.push({label:entry,data:projects[entry]});
+					}
+
+					$.plot('#projectChart', plotData, {series:{pie:{show:true}}});
+								
+				});
 			});
 	}
 
