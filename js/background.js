@@ -26,10 +26,25 @@ togglEntries = function(start,stop,callback) {
 
 togglWorkspaces = function(callback) {
 	console.log('Fetching workspaces list');
+	var call = '/workspaces';
+	return togglRequest('GET', call, function(response) { callback({workspaces:response}) });
+}
+
+togglProjectForWorkspace = function(workspaces, widx, projects, callback) {
+	if (widx < workspaces.length) {
+		console.log('Getting projects for workspace ' + workspaces[widx].id);
+		togglRequest('GET', '/workspaces/' + workspaces[widx].id + '/projects', function(response) {
+			response.map(function(e) { projects[e.id] = e; });
+			togglProjectForWorkspace(workspaces, widx + 1, projects, callback);
+		});
+	} else {
+		callback({projects:projects});
+	}
 }
 
 togglProjects = function(callback) {
 	console.log('Fetching projects list');
+	return togglWorkspaces(function(response) { togglProjectForWorkspace(response.workspaces, 0, {}, callback); });
 }
 
 togglTags = function(callback) {
@@ -58,7 +73,6 @@ handleMessage = function(msg,sender,callback) {
 }
 
 chrome.app.runtime.onLaunched.addListener(function() {
-	togglRequest('GET','/me', function(resp) { console.log(resp); });
 	chrome.runtime.onMessage.addListener(handleMessage);
 
 	chrome.app.window.create('html/main.html', {
