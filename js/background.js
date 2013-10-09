@@ -59,13 +59,13 @@ handleMessage = function(msg,sender,callback) {
 			return togglEntries(msg.start, msg.stop, callback);
 			break;
 		case 'workspaces':
-			togglWorkspaces(callback);
+			return togglWorkspaces(callback);
 			break;
 		case 'projects':
-			togglProjects(callback);
+			return togglProjects(callback);
 			break;
 		case 'tags':
-			togglTags(callback);
+			return togglTags(callback);
 			break;
 		default:
 			break;
