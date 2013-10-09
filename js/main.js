@@ -31,7 +31,7 @@ function TagBrowserCtrl($scope) {
 
 					var plotData = [];
 					for (var entry in projects) {
-						plotData.push({label:entry,data:projects[entry]});
+						plotData.push({label:$scope.projects[entry].name,data:projects[entry]});
 					}
 
 					$.plot('#projectChart', plotData, {series:{pie:{show:true}}});
@@ -39,6 +39,19 @@ function TagBrowserCtrl($scope) {
 				});
 			});
 	}
+
+	function requestProjects(callback) {
+		var msg = {type:'projects'};
+		chrome.runtime.sendMessage(msg, function(response) {
+			$scope.projects = response.projects;
+			callback();
+		})
+	}
+
+	function startup() {
+		requestProjects(requestTimeEntries);
+	}
+		
 
 	function changeEntryRange(start,end) {
 		$scope.startDate = start;
@@ -57,7 +70,7 @@ function TagBrowserCtrl($scope) {
 			$scope.$apply(changeEntryRange(start,end));
 		});
 
-		requestTimeEntries();
+		startup();
 	});
 }
 
