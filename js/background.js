@@ -38,7 +38,7 @@ togglProjectForWorkspace = function(workspaces, widx, projects, callback) {
 			togglProjectForWorkspace(workspaces, widx + 1, projects, callback);
 		});
 	} else {
-		callback({projects:projects});
+		callback({workspaces:workspaces, projects:projects});
 	}
 }
 
