@@ -27,24 +27,34 @@ togglEntries = function(start,stop,callback) {
 togglWorkspaces = function(callback) {
 	console.log('Fetching workspaces list');
 	var call = '/workspaces';
-	return togglRequest('GET', call, function(response) { callback({workspaces:response}) });
+	return togglRequest('GET', call, function(response) {
+		var workspaces = {};
+		response.map(function(e) { workspaces[e.id] = e; });
+		callback({workspaces:workspaces})
+	});
 }
 
-togglProjectForWorkspace = function(workspaces, widx, projects, callback) {
+togglProjectForWorkspace = function(workspaces, widx, returnObj, callback) {
 	if (widx < workspaces.length) {
 		console.log('Getting projects for workspace ' + workspaces[widx].id);
 		togglRequest('GET', '/workspaces/' + workspaces[widx].id + '/projects', function(response) {
-			response.map(function(e) { projects[e.id] = e; });
-			togglProjectForWorkspace(workspaces, widx + 1, projects, callback);
+			response.map(function(e) { returnObj.projects[e.id] = e; });
+			togglProjectForWorkspace(workspaces, widx + 1, returnObj, callback);
 		});
 	} else {
-		callback({workspaces:workspaces, projects:projects});
+		callback(returnObj);
 	}
 }
 
 togglProjects = function(callback) {
 	console.log('Fetching projects list');
-	return togglWorkspaces(function(response) { togglProjectForWorkspace(response.workspaces, 0, {}, callback); });
+	return togglWorkspaces(function(response) {
+		var workspaceArr = [];
+		for (entry in response.workspaces) {
+			workspaceArr.push(response.workspaces[entry]);
+		}
+
+		togglProjectForWorkspace(workspaceArr, 0, {workspaces:response.workspaces, projects:{}}, callback); });
 }
 
 togglTags = function(callback) {
