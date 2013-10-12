@@ -39,7 +39,7 @@ togglProjectForWorkspace = function(workspaces, widx, returnObj, callback) {
 		console.log('Getting projects for workspace ' + workspaces[widx].id);
 		togglRequest('GET', '/workspaces/' + workspaces[widx].id + '/projects', function(response) {
 			response.map(function(e) { returnObj.projects[e.id] = e; });
-			togglProjectForWorkspace(workspaces, widx + 1, returnObj, callback);
+			return togglProjectForWorkspace(workspaces, widx + 1, returnObj, callback);
 		});
 	} else {
 		callback(returnObj);
