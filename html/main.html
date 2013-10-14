@@ -11,22 +11,26 @@
 </head>
 <body ng-controller="TagBrowserCtrl">
 	<div class="row">
-		<div class="col-sm-3">
+		<div class="col-sm-4">
 			<div id="reportrange" class="reportrange well">
 				<span class="glyphicon glyphicon-calendar" style="font-size:18px;"></span> <span id="entryrange">{{startDateLabel}} - {{endDateLabel}}</span>
 			</div>
 
 			<div id="projects" class="well">
-				Projects
+				<h4>Projects</h4>
 				<ul class="filterList">
-					<li ng-repeat="(project_id, project) in activeProjects"><input type="checkbox"> {{projects[project_id].name}}</li>
+					<li ng-repeat="(project_id, project) in activeProjects">
+						<button type="button" class="btn btn-default btn-xs">{{projects[project_id].name}}</button>
+					</li>
 				</ul>
 			</div>
 
 			<div id="tags" class="well">
-				Tags
+				<h4>Tags</h4>
 				<ul class="filterList">
-					<li ng-repeat="(tag, tag_duration) in activeTags"><input type="checkbox"> {{tag}}</li>
+					<li ng-repeat="(tag, tag_duration) in activeTags">
+						<button type="button" class="btn btn-default btn-xs">{{tag}}</button>
+					</li>
 				</ul>
 			</div>
 		</div>

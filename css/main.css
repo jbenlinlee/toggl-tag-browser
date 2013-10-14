@@ -10,3 +10,7 @@ ul.filterList {
 	list-style-type: none;
 	padding-left: 0px;
 }
+
+ul.filterList li {
+	margin: 2px 0px 2px;
+}
