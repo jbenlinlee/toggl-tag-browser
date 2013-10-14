@@ -1,3 +1,12 @@
+html {
+	overflow-y: scroll;
+}
+
 body {
 	margin: 20px;
+}
+
+ul.filterList {
+	list-style-type: none;
+	padding-left: 0px;
 }

@@ -1,17 +1,42 @@
-<html ng-app ng-csp>
+<!DOCTYPE html>
+<html ng-app ng-csp lang="en">
 <head>
 	<title>toggl-tag-browser</title>
+
 	<link rel="stylesheet" href="../css/daterangepicker-bs3.css"/>
 	<link href="../css/bootstrap.min.css" rel="stylesheet" media="screen"/>
 	<link href="../css/main.css" rel="stylesheet"/>
 
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body ng-controller="TagBrowserCtrl">
-	<div id="reportrange" class="reportrange">
-		<span class="glyphicon glyphicon-calendar" style="font-size:18px;"></span> <span id="entryrange">{{startDateLabel}} - {{endDateLabel}}</span>
+	<div class="row">
+		<div class="col-sm-3">
+			<div id="reportrange" class="reportrange well">
+				<span class="glyphicon glyphicon-calendar" style="font-size:18px;"></span> <span id="entryrange">{{startDateLabel}} - {{endDateLabel}}</span>
+			</div>
+
+			<div id="projects" class="well">
+				Projects
+				<ul class="filterList">
+					<li ng-repeat="(project_id, project) in activeProjects"><input type="checkbox"> {{projects[project_id].name}}</li>
+				</ul>
+			</div>
+
+			<div id="tags" class="well">
+				Tags
+				<ul class="filterList">
+					<li ng-repeat="(tag, tag_duration) in activeTags"><input type="checkbox"> {{tag}}</li>
+				</ul>
+			</div>
+		</div>
+
+		<div class="col-sm-8">
+			<div class="well">Some content here</div>
+		</div>
 	</div>
 
-	<div id="projectChart" style="width:400px; height:300px;"></div>
+
 
 	<script type="text/javascript" src="../js/jquery-2.0.3.min.js"></script>
 	<script type="text/javascript" src="../js/angular.min.js"></script>
