@@ -7,8 +7,6 @@ function TagBrowserCtrl($scope) {
 	$scope.endDate = moment();
 	$scope.endDateLabel = $scope.endDate.format($scope.entryRangeFormat);
 	
-	$scope.entries = [];
-	$scope.filteredEntries = [];
 	$scope.projects = {};
 	$scope.workspaces = {};
 	$scope.tags = {};
@@ -17,14 +15,15 @@ function TagBrowserCtrl($scope) {
 	$scope.activeProjects = {};
 	$scope.activeTags = {};
 	$scope.activeEntries = [];
+	$scope.filteredEntries = [];
 
 	function requestTimeEntries() {
 		var msg = {type:'entries', start:$scope.startDate.valueOf(), stop:$scope.endDate.valueOf()};
 		chrome.runtime.sendMessage(msg, function(response) {
 				console.log('Got ' + response.entries.length + ' entries');
 				$scope.$apply(function() {
-					$scope.entries = response.entries;
-					$scope.activeEntries = $scope.entries;
+					$scope.activeEntries = response.entries;
+					$scope.filteredEntries = $scope.activeEntries;
 				});
 			});
 	}
@@ -68,6 +67,14 @@ function TagBrowserCtrl($scope) {
 				});
 			}
 		});
+	}
+
+	$scope.toggleProject = function(project_id) {
+		$scope.projects[project_id].selected = !($scope.projects[project_id].selected || false);
+	}
+
+	$scope.btnForProject = function(project_id) {
+		return ($scope.projects[project_id].selected || false) ? "btn-success" : "btn-default";
 	}
 
 	$scope.$watch("activeEntries", function(newValue,oldValue) {

@@ -20,7 +20,7 @@
 				<h4>Projects</h4>
 				<ul class="filterList">
 					<li ng-repeat="(project_id, project) in activeProjects">
-						<button type="button" class="btn btn-default btn-xs">{{projects[project_id].name}}</button>
+						<button type="button" class="btn {{btnForProject(project_id)}} btn-xs" ng-click="toggleProject(project_id)">{{projects[project_id].name}}</button>
 					</li>
 				</ul>
 			</div>
@@ -36,7 +36,9 @@
 		</div>
 
 		<div class="col-sm-8">
-			<div class="well">Some content here</div>
+			<ul>
+				<li ng-repeat="entry in filteredEntries">{{entry.description}}</li>
+			</ul>
 		</div>
 	</div>
 
