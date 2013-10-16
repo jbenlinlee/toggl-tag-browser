@@ -58,11 +58,11 @@ function TagBrowserCtrl($scope) {
 
 		$scope.activeEntries.forEach(function(entry) {
 			if (entry.duration > 0) { // There could be entries in progress
-				$scope.activeWorkspaces[entry.wid] = ($scope.activeWorkspaces[entry.wid] ? $scope.activeWorkspaces[entry.wid] : 0) + entry.duration;
-				$scope.activeProjects[entry.pid] = ($scope.activeProjects[entry.pid] ? $scope.activeProjects[entry.pid] : 0) + entry.duration;
+				$scope.activeWorkspaces[entry.wid] = ($scope.activeWorkspaces[entry.wid] || 0) + entry.duration;
+				$scope.activeProjects[entry.pid] = ($scope.activeProjects[entry.pid] || 0) + entry.duration;
 				entry.tags.forEach(function(tag) {
 					if (tag.length > 0) {
-						$scope.activeTags[tag] = ($scope.activeTags[tag] ? $scope.activeTags[tag] : 0) + entry.duration;
+						$scope.activeTags[tag] = ($scope.activeTags[tag] || 0) + entry.duration;
 					}
 				});
 			}
