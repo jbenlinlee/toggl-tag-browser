@@ -51,6 +51,15 @@ function TagBrowserCtrl($scope) {
 		requestTimeEntries();
 	}
 
+	function updateFilteredEntrySet() {
+		$scope.filteredEntries = [];
+		$scope.activeEntries.forEach(function(entry) {
+			if ($scope.projects[entry.pid].selected) {
+				$scope.filteredEntries.push(entry);
+			}
+		});
+	}
+
 	function processEntrySetChange() {
 		$scope.activeWorkspaces = {};
 		$scope.activeProjects = {};
@@ -67,10 +76,13 @@ function TagBrowserCtrl($scope) {
 				});
 			}
 		});
+
+		updateFilteredEntrySet();
 	}
 
 	$scope.toggleProject = function(project_id) {
 		$scope.projects[project_id].selected = !($scope.projects[project_id].selected || false);
+		updateFilteredEntrySet();
 	}
 
 	$scope.btnForProject = function(project_id) {
