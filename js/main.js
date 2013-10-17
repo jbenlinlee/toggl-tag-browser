@@ -53,9 +53,15 @@ function TagBrowserCtrl($scope) {
 
 	function updateFilteredEntrySet() {
 		$scope.filteredEntries = [];
+		$scope.filteredTags = {};
 		$scope.activeEntries.forEach(function(entry) {
 			if ($scope.projects[entry.pid].selected) {
 				$scope.filteredEntries.push(entry);
+				entry.tags.forEach(function(tag) {
+					if (tag.length > 0) {
+						$scope.filteredTags[tag] = null;
+					}
+				});
 			}
 		});
 	}
@@ -69,11 +75,6 @@ function TagBrowserCtrl($scope) {
 			if (entry.duration > 0) { // There could be entries in progress
 				$scope.activeWorkspaces[entry.wid] = ($scope.activeWorkspaces[entry.wid] || 0) + entry.duration;
 				$scope.activeProjects[entry.pid] = ($scope.activeProjects[entry.pid] || 0) + entry.duration;
-				entry.tags.forEach(function(tag) {
-					if (tag.length > 0) {
-						$scope.activeTags[tag] = ($scope.activeTags[tag] || 0) + entry.duration;
-					}
-				});
 			}
 		});
 
@@ -87,6 +88,10 @@ function TagBrowserCtrl($scope) {
 
 	$scope.btnForProject = function(project_id) {
 		return ($scope.projects[project_id].selected || false) ? "btn-success" : "btn-default";
+	}
+
+	$scope.btnForTag = function(tag) {
+		return ($scope.filteredTags[tag] === null) ? "btn-default" : "disabled";
 	}
 
 	$scope.$watch("activeEntries", function(newValue,oldValue) {
