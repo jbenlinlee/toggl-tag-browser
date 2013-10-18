@@ -94,7 +94,7 @@ function TagBrowserCtrl($scope) {
 
 	function updateTagTimeSeries() {
 		if ($scope.filteredEntries.length > 0) {
-			var daysInRange = Math.floor(moment.duration($scope.endDate - $scope.startDate).asDays());
+			var daysInRange = Math.floor(moment.duration($scope.endDate - $scope.startDate).asDays()) + 1;
 			var durationOverTime = new Array(daysInRange);
 			for(var i = 0; i < daysInRange; ++i) {
 				durationOverTime[i] = [i,0];
