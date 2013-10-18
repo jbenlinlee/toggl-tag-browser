@@ -54,7 +54,7 @@ function TagBrowserCtrl($scope) {
 		$scope.filteredEntries = [];
 
 		$scope.activeEntries.forEach(function(entry) {
-			if ($scope.projects[entry.pid].selected) {
+			if ($scope.projects[entry.pid].selected && entry.duration > 0) {
 				var hasActiveTag = false;
 				var numSelectedTags = 0;
 
@@ -92,6 +92,22 @@ function TagBrowserCtrl($scope) {
 		})
 	}
 
+	function updateTagTimeSeries() {
+		var daysInRange = Math.floor(moment.duration($scope.endDate - $scope.startDate).asDays());
+		var durationOverTime = new Array(daysInRange);
+		for(var i = 0; i < daysInRange; ++i) {
+			durationOverTime[i] = 0;
+		}
+
+		$scope.filteredEntries.forEach(function(entry) {
+			if (entry.duration > 0) {
+				var dayIndex = Math.floor(moment.duration(moment(entry.start) - $scope.startDate).asDays());
+				durationOverTime[dayIndex] = (durationOverTime[dayIndex] || 0) + entry.duration;
+			}
+		});
+		console.log(durationOverTime);
+	}
+
 	function processEntrySetChange() {
 		$scope.activeProjects = {};
 		$scope.activeTags = {};
@@ -126,6 +142,10 @@ function TagBrowserCtrl($scope) {
 
 	$scope.$watch("activeEntries", function(newValue,oldValue) {
 		processEntrySetChange();
+	});
+
+	$scope.$watch("filteredEntries", function(newValue,oldValue) {
+		updateTagTimeSeries();
 	});
 
 	$(document).ready(function() {
