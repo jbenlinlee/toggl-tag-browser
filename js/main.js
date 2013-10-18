@@ -7,15 +7,14 @@ function TagBrowserCtrl($scope) {
 	$scope.endDate = moment();
 	$scope.endDateLabel = $scope.endDate.format($scope.entryRangeFormat);
 	
-	$scope.projects = {};
-	$scope.workspaces = {};
+	$scope.projects = {};    // All projects
+	$scope.workspaces = {};  // All workspaces
 	$scope.tags = {};
 
-	$scope.activeWorkspaces = {};
-	$scope.activeProjects = {};
-	$scope.activeTags = {};
-	$scope.activeEntries = [];
-	$scope.filteredEntries = [];
+	$scope.activeEntries = [];     // Entries in selected dates
+	$scope.activeProjects = {};    // Projects in active entries
+	$scope.filteredEntries = [];   // Entries selected by project and tag
+	$scope.filteredTags = {};      // Tags in selected projects
 
 	function requestTimeEntries() {
 		var msg = {type:'entries', start:$scope.startDate.valueOf(), stop:$scope.endDate.valueOf()};
@@ -53,27 +52,52 @@ function TagBrowserCtrl($scope) {
 
 	function updateFilteredEntrySet() {
 		$scope.filteredEntries = [];
-		$scope.filteredTags = {};
+
 		$scope.activeEntries.forEach(function(entry) {
 			if ($scope.projects[entry.pid].selected) {
-				$scope.filteredEntries.push(entry);
-				entry.tags.forEach(function(tag) {
-					if (tag.length > 0) {
-						$scope.filteredTags[tag] = null;
+				var hasActiveTag = false;
+				var numSelectedTags = 0;
+
+				for (var tag in $scope.filteredTags) {
+					if ($scope.filteredTags[tag].selected) {
+						++numSelectedTags;
 					}
-				});
+				}
+
+				if (numSelectedTags > 0) {
+					entry.tags.forEach(function(tag) {
+						hasActiveTag = hasActiveTag || $scope.filteredTags[tag].selected;
+					});
+				}
+
+				if (numSelectedTags == 0 || hasActiveTag) {
+					$scope.filteredEntries.push(entry);
+				}
 			}
 		});
 	}
 
+	function updateFilteredTagSet() {
+		$scope.filteredTags = {};
+		$scope.numFilteredTags = 0;
+
+		$scope.activeEntries.forEach(function(entry) {
+			if ($scope.projects[entry.pid].selected) {
+				entry.tags.forEach(function(tag) {
+					if (tag.length > 0) {
+						$scope.filteredTags[tag] = {tag:tag, selected:false};
+					}
+				});
+			}
+		})
+	}
+
 	function processEntrySetChange() {
-		$scope.activeWorkspaces = {};
 		$scope.activeProjects = {};
 		$scope.activeTags = {};
 
 		$scope.activeEntries.forEach(function(entry) {
 			if (entry.duration > 0) { // There could be entries in progress
-				$scope.activeWorkspaces[entry.wid] = ($scope.activeWorkspaces[entry.wid] || 0) + entry.duration;
 				$scope.activeProjects[entry.pid] = ($scope.activeProjects[entry.pid] || 0) + entry.duration;
 			}
 		});
@@ -83,6 +107,12 @@ function TagBrowserCtrl($scope) {
 
 	$scope.toggleProject = function(project_id) {
 		$scope.projects[project_id].selected = !($scope.projects[project_id].selected || false);
+		updateFilteredTagSet();
+		updateFilteredEntrySet();
+	}
+
+	$scope.toggleTag = function(tag) {
+		$scope.filteredTags[tag].selected = !($scope.filteredTags[tag].selected || false);
 		updateFilteredEntrySet();
 	}
 
@@ -91,7 +121,7 @@ function TagBrowserCtrl($scope) {
 	}
 
 	$scope.btnForTag = function(tag) {
-		return ($scope.filteredTags[tag] === null) ? "btn-default" : "disabled";
+		return ($scope.filteredTags[tag].selected || false) ? "btn-success" : "btn-default";
 	}
 
 	$scope.$watch("activeEntries", function(newValue,oldValue) {
