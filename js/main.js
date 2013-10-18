@@ -93,19 +93,25 @@ function TagBrowserCtrl($scope) {
 	}
 
 	function updateTagTimeSeries() {
-		var daysInRange = Math.floor(moment.duration($scope.endDate - $scope.startDate).asDays());
-		var durationOverTime = new Array(daysInRange);
-		for(var i = 0; i < daysInRange; ++i) {
-			durationOverTime[i] = 0;
-		}
-
-		$scope.filteredEntries.forEach(function(entry) {
-			if (entry.duration > 0) {
-				var dayIndex = Math.floor(moment.duration(moment(entry.start) - $scope.startDate).asDays());
-				durationOverTime[dayIndex] = (durationOverTime[dayIndex] || 0) + entry.duration;
+		if ($scope.filteredEntries.length > 0) {
+			var daysInRange = Math.floor(moment.duration($scope.endDate - $scope.startDate).asDays());
+			var durationOverTime = new Array(daysInRange);
+			for(var i = 0; i < daysInRange; ++i) {
+				durationOverTime[i] = [i,0];
 			}
-		});
-		console.log(durationOverTime);
+
+			$scope.filteredEntries.forEach(function(entry) {
+				if (entry.duration > 0) {
+					var dayIndex = Math.floor(moment.duration(moment(entry.start) - $scope.startDate).asDays());
+					durationOverTime[dayIndex][1] += entry.duration;
+				}
+			});
+			console.log(durationOverTime);
+
+			$.plot($("#plot-all"), [{data:durationOverTime, color:"#000000", lines:{show:true,lineWidth:1,fill:true,fillColor:"#000000"}}], {grid:{show:false}});
+		} else {
+			$("#plot-all").empty();
+		}
 	}
 
 	function processEntrySetChange() {
