@@ -143,6 +143,10 @@ function TagBrowserCtrl($scope) {
 		updateFilteredEntrySet();
 	}
 
+	$scope.allFilter = function(tag) {
+		return tag !== 'ALL';
+	}
+
 	$scope.renderTagTimeSeries = function(tag, plotdiv) {
 		$.plot(document.getElementById(plotdiv), [{
 			data:$scope.filteredTagTimeSeries[tag],
