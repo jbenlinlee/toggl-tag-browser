@@ -14,3 +14,9 @@ ul.filterList {
 ul.filterList li {
 	margin: 2px 0px 2px;
 }
+
+div.tag-plot {
+	width: 500px;
+	height: 10px;
+	padding: 10px;
+}

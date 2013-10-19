@@ -15,6 +15,7 @@ function TagBrowserCtrl($scope) {
 	$scope.activeProjects = {};    // Projects in active entries
 	$scope.filteredEntries = [];   // Entries selected by project and tag
 	$scope.filteredTags = {};      // Tags in selected projects
+	$scope.filteredTagTimeSeries = {};
 
 	function requestTimeEntries() {
 		var msg = {type:'entries', start:$scope.startDate.valueOf(), stop:$scope.endDate.valueOf()};
@@ -92,25 +93,40 @@ function TagBrowserCtrl($scope) {
 		})
 	}
 
+	function createTimeArray(daysInRange) {
+		var arr = new Array(daysInRange);
+		for (var i = 0; i < daysInRange; ++i) {
+			arr[i] = [i,0];
+		}
+
+		return arr;
+	}
+
 	function updateTagTimeSeries() {
 		if ($scope.filteredEntries.length > 0) {
 			var daysInRange = Math.floor(moment.duration($scope.endDate - $scope.startDate).asDays()) + 1;
-			var durationOverTime = new Array(daysInRange);
-			for(var i = 0; i < daysInRange; ++i) {
-				durationOverTime[i] = [i,0];
+			$scope.filteredTagTimeSeries = {};
+			$scope.filteredTagTimeSeries['ALL'] = createTimeArray(daysInRange);
+			for (var tag in $scope.filteredTags) {
+				if (!$scope.filteredTags[tag].selected) {
+					$scope.filteredTagTimeSeries[tag] = createTimeArray(daysInRange);
+				}
 			}
 
 			$scope.filteredEntries.forEach(function(entry) {
 				if (entry.duration > 0) {
 					var dayIndex = Math.floor(moment.duration(moment(entry.start) - $scope.startDate).asDays());
-					durationOverTime[dayIndex][1] += entry.duration;
+					$scope.filteredTagTimeSeries['ALL'][dayIndex][1] += entry.duration;
+
+					entry.tags.forEach(function(tag) {
+						if (!$scope.filteredTags[tag].selected) {
+							$scope.filteredTagTimeSeries[tag][dayIndex][1] += entry.duration;
+						}
+					});
 				}
 			});
-			console.log(durationOverTime);
 
-			$.plot($("#plot-all"), [{data:durationOverTime, color:"#000000", lines:{show:true,lineWidth:1,fill:true,fillColor:"#000000"}}], {grid:{show:false}});
-		} else {
-			$("#plot-all").empty();
+			console.log($scope.filteredTagTimeSeries);
 		}
 	}
 
@@ -125,6 +141,23 @@ function TagBrowserCtrl($scope) {
 		});
 
 		updateFilteredEntrySet();
+	}
+
+	$scope.renderTagTimeSeries = function(tag, plotdiv) {
+		$.plot(document.getElementById(plotdiv), [{
+			data:$scope.filteredTagTimeSeries[tag],
+			color:"#3F3F3F",
+			shadowSize:0,
+			lines:{
+				show:true,
+				lineWidth:1,
+				fill:true,
+				fillColor:"#3F3F3F"
+			},
+			points:{
+				show:false,
+				radius:1
+			}}], {grid:{show:false}});
 	}
 
 	$scope.toggleProject = function(project_id) {
