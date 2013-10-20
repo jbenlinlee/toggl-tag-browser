@@ -197,7 +197,7 @@ function TagBrowserCtrl($scope) {
 					},
 					points:{
 						show:true,
-						radius:1
+						radius:2
 					},
 					bars:{
 						show:false,
@@ -207,7 +207,7 @@ function TagBrowserCtrl($scope) {
 				{
 					grid: {
 						show:false,
-						margin: {top:2, bottom:2, right:2, left:2},
+						margin: {top:7, bottom:7, right:7, left:7},
 						hoverable:true
 					}
 				});
