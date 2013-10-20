@@ -39,6 +39,7 @@
 			<table>
 				<tr ng-repeat="(tag,tag_series) in filteredTagTimeSeries">
 					<td>{{tag}}</td>
+					<td><div class="tag-share-plot" id="plot-pie-{{tag}}">{{renderTagDurationShare(tag,"plot-pie-"+tag)}}</div></td>
 					<td><div class="tag-plot" id="plot-{{tag}}">{{renderTagTimeSeries(tag,"plot-"+tag)}}</div></td>
 				</tr>
 			</table>
@@ -55,6 +56,7 @@
 	<script type="text/javascript" src="../js/daterangepicker.js"></script>
 
 	<script type="text/javascript" src="../js/jquery.flot.min.js"></script>
+	<script type="text/javascript" src="../js/jquery.flot.pie.min.js"></script>
 
 	<script type="text/javascript" src="../js/main.js"></script>
 </body>

@@ -206,6 +206,34 @@ function TagBrowserCtrl($scope) {
 		}
 	}
 
+	$scope.renderTagDurationShare = function(tag, plotdiv) {
+		var divElem = document.getElementById(plotdiv);
+		var tagData = $scope.filteredTagTimeSeries[tag];
+
+		if (tag !== undefined && divElem && tagData !== undefined) {
+			console.log("Rendering duration share for " + tag + " into " + plotdiv);
+
+			var plotData = [
+				{label:tag, data:tagData.durationShare},
+				{label:"other", data:(1 - tagData.durationShare)}
+			];
+			
+			$.plot(divElem, plotData, {
+				series: {
+					pie: {
+						show:true,
+						radius:1,
+						stroke: {width:0},
+						label: {show:false}
+					}
+				},
+				colors: ["#00A3EE", "#3F3F3F"],
+				legend: {
+					show: false
+				}});
+		}
+	}
+
 	$scope.toggleProject = function(project_id) {
 		$scope.projects[project_id].selected = !($scope.projects[project_id].selected || false);
 		console.log("Project " + project_id + " is now selected=" + $scope.projects[project_id].selected);
