@@ -36,17 +36,12 @@
 		</div>
 
 		<div class="col-sm-8">
-			<!-- <div id="plot-all" style="width:500px;height:10px;"></div> -->
 			<table>
 				<tr ng-repeat="(tag,tag_series) in filteredTagTimeSeries">
 					<td>{{tag}}</td>
 					<td><div class="tag-plot" id="plot-{{tag}}">{{renderTagTimeSeries(tag,"plot-"+tag)}}</div></td>
 				</tr>
 			</table>
-
-			<ul>
-				<li ng-repeat="entry in filteredEntries">{{entry.description}}</li>
-			</ul>
 		</div>
 	</div>
 
@@ -60,7 +55,6 @@
 	<script type="text/javascript" src="../js/daterangepicker.js"></script>
 
 	<script type="text/javascript" src="../js/jquery.flot.min.js"></script>
-	<script type="text/javascript" src="../js/jquery.flot.pie.min.js"></script>
 
 	<script type="text/javascript" src="../js/main.js"></script>
 </body>
