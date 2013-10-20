@@ -121,7 +121,7 @@ function TagBrowserCtrl($scope) {
 
 			$scope.filteredEntries.forEach(function(entry) {
 				if (entry.duration > 0) {
-					var dayIndex = Math.floor(moment.duration(moment(entry.start) - $scope.startDate).asDays());
+					var dayIndex = Math.floor(moment.duration(moment(moment(entry.start).format("YYYY-MM-DD")) - $scope.startDate).asDays());
 					$scope.filteredTagTimeSeries['ALL'][dayIndex][1] += entry.duration;
 
 					entry.tags.forEach(function(tag) {
