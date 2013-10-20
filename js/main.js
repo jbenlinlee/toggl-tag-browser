@@ -147,7 +147,7 @@ function TagBrowserCtrl($scope) {
 					seriesDuration += dataSeries[i][1];
 				}
 
-				$scope.filteredTagTimeSeries[tag] = {durationShare:(seriesDuration/totalDuration), timeSeries:dataSeries};
+				$scope.filteredTagTimeSeries[tag] = {duration:seriesDuration, durationShare:(seriesDuration/totalDuration), timeSeries:dataSeries};
 			}
 
 			console.log($scope.filteredTagTimeSeries);
@@ -239,6 +239,10 @@ function TagBrowserCtrl($scope) {
 				legend: {
 					show: false
 				}});
+
+			var popupText = Math.floor(tagData.durationShare * 100) + "%; " + moment.duration(tagData.duration * 1000).humanize();
+
+			$(divElem).tooltip({title:popupText, placement:"right"});
 		}
 	}
 
