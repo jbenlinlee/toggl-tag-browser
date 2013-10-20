@@ -184,25 +184,33 @@ function TagBrowserCtrl($scope) {
 		if (tag !== undefined && divElem && $scope.filteredTagTimeSeries[tag] !== undefined) {
 			console.log("Rendering time series for " + tag + " into " + plotdiv);
 
-			$.plot(divElem, [{
-				data:$scope.filteredTagTimeSeries[tag].timeSeries,
-				color:"#3F3F3F",
-				shadowSize:0,
-				lines:{
-					show:true,
-					lineWidth:1,
-					fill:false,
-					fillColor:"#3F3F3F"
-				},
-				points:{
-					show:true,
-					radius:1
-				},
-				bars:{
-					show:false,
-					fillColor:"#3F3F3F",
-					barWidth:0.1
-				}}], {grid:{show:false}});
+			$.plot(divElem,
+				[{
+					data:$scope.filteredTagTimeSeries[tag].timeSeries,
+					color:"#3F3F3F",
+					shadowSize:0,
+					lines:{
+						show:true,
+						lineWidth:1,
+						fill:false,
+						fillColor:"#3F3F3F"
+					},
+					points:{
+						show:true,
+						radius:1
+					},
+					bars:{
+						show:false,
+						fillColor:"#3F3F3F",
+						barWidth:0.1
+					}}],
+				{
+					grid: {
+						show:false,
+						margin: {top:2, bottom:2, right:2, left:2},
+						hoverable:true
+					}
+				});
 		}
 	}
 
@@ -227,7 +235,7 @@ function TagBrowserCtrl($scope) {
 						label: {show:false}
 					}
 				},
-				colors: ["#00A3EE", "#3F3F3F"],
+				colors: ["#F5D908", "#3F3F3F"],
 				legend: {
 					show: false
 				}});
