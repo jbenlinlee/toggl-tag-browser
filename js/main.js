@@ -44,9 +44,9 @@ function TagBrowserCtrl($scope) {
 	}
 		
 	function changeEntryRange(start,end) {
-		$scope.startDate = start;
+		$scope.startDate = moment(start.format("YYYY-MM-DD"));
 		$scope.startDateLabel = $scope.startDate.format($scope.entryRangeFormat);
-		$scope.endDate = end;
+		$scope.endDate = moment(end.format("YYYY-MM-DD"));
 		$scope.endDateLabel = $scope.endDate.format($scope.entryRangeFormat);
 		
 		console.log("Got new time range");
@@ -121,7 +121,9 @@ function TagBrowserCtrl($scope) {
 
 			$scope.filteredEntries.forEach(function(entry) {
 				if (entry.duration > 0) {
-					var dayIndex = Math.floor(moment.duration(moment(moment(entry.start).format("YYYY-MM-DD")) - $scope.startDate).asDays());
+					var entryMoment = moment(entry.start);
+					var entryDate = moment(entryMoment.format("YYYY-MM-DD"));
+					var dayIndex = Math.floor(moment.duration(entryDate - $scope.startDate).asDays());
 					$scope.filteredTagTimeSeries['ALL'][dayIndex][1] += entry.duration;
 
 					entry.tags.forEach(function(tag) {
