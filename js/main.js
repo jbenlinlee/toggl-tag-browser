@@ -1,11 +1,12 @@
 function TagBrowserCtrl($scope) {
 	$scope.entryRangeFormat = 'ddd, MMM D YYYY';
 
-	$scope.startDate = moment().subtract('days',7);
-	$scope.startDateLabel = $scope.startDate.format($scope.entryRangeFormat);
-
-	$scope.endDate = moment();
+	$scope.endDate = moment(moment().format("YYYY-MM-DD"));
 	$scope.endDateLabel = $scope.endDate.format($scope.entryRangeFormat);
+
+	$scope.startDate = moment($scope.endDate);
+	$scope.startDate.subtract('days',7);
+	$scope.startDateLabel = $scope.startDate.format($scope.entryRangeFormat);
 	
 	$scope.projects = {};    // All projects
 	$scope.workspaces = {};  // All workspaces
@@ -44,9 +45,9 @@ function TagBrowserCtrl($scope) {
 	}
 		
 	function changeEntryRange(start,end) {
-		$scope.startDate = moment(start.format("YYYY-MM-DD"));
+		$scope.startDate = moment(start.format("YYYY-MM-DD"), "YYYY-MM-DD");
 		$scope.startDateLabel = $scope.startDate.format($scope.entryRangeFormat);
-		$scope.endDate = moment(end.format("YYYY-MM-DD"));
+		$scope.endDate = moment(end.format("YYYY-MM-DD", "YYYY-MM-DD"));
 		$scope.endDateLabel = $scope.endDate.format($scope.entryRangeFormat);
 		
 		console.log("Got new time range");
@@ -116,14 +117,18 @@ function TagBrowserCtrl($scope) {
 		$scope.filteredTagTimeSeries = {};
 
 		if ($scope.filteredEntries.length > 0) {
-			var daysInRange = Math.floor(moment.duration($scope.endDate - $scope.startDate).asDays()) + 1;
+			var daysInRange = Math.floor(moment.duration($scope.endDate.valueOf() - $scope.startDate.valueOf()).asDays()) + 1;
 			$scope.filteredTagTimeSeries['ALL'] = createTimeArray(daysInRange);
+
+			var totalDuration = 0;
 
 			$scope.filteredEntries.forEach(function(entry) {
 				if (entry.duration > 0) {
+					totalDuration += entry.duration;
+
 					var entryMoment = moment(entry.start);
 					var entryDate = moment(entryMoment.format("YYYY-MM-DD"));
-					var dayIndex = Math.floor(moment.duration(entryDate - $scope.startDate).asDays());
+					var dayIndex = Math.floor(moment.duration(entryDate.valueOf() - $scope.startDate.valueOf()).asDays());
 					$scope.filteredTagTimeSeries['ALL'][dayIndex][1] += entry.duration;
 
 					entry.tags.forEach(function(tag) {
@@ -134,6 +139,16 @@ function TagBrowserCtrl($scope) {
 					});
 				}
 			});
+
+			for (var tag in $scope.filteredTagTimeSeries) {
+				var dataSeries = $scope.filteredTagTimeSeries[tag];
+				var seriesDuration = 0;
+				for (var i = 0; i < dataSeries.length; ++i) {
+					seriesDuration += dataSeries[i][1];
+				}
+
+				$scope.filteredTagTimeSeries[tag] = {durationShare:(seriesDuration/totalDuration), timeSeries:dataSeries};
+			}
 
 			console.log($scope.filteredTagTimeSeries);
 		}
@@ -170,7 +185,7 @@ function TagBrowserCtrl($scope) {
 			console.log("Rendering time series for " + tag + " into " + plotdiv);
 
 			$.plot(divElem, [{
-				data:$scope.filteredTagTimeSeries[tag],
+				data:$scope.filteredTagTimeSeries[tag].timeSeries,
 				color:"#3F3F3F",
 				shadowSize:0,
 				lines:{
