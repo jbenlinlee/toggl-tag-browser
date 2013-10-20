@@ -164,7 +164,7 @@ function TagBrowserCtrl($scope) {
 	$scope.renderTagTimeSeries = function(tag, plotdiv) {
 		var divElem = document.getElementById(plotdiv);
 
-		if (tag !== undefined && divElem !== undefined && $scope.filteredTagTimeSeries[tag] !== undefined) {
+		if (tag !== undefined && divElem && $scope.filteredTagTimeSeries[tag] !== undefined) {
 			console.log("Rendering time series for " + tag + " into " + plotdiv);
 
 			$.plot(divElem, [{
