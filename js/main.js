@@ -18,6 +18,7 @@ function TagBrowserCtrl($scope) {
 	$scope.filteredTagTimeSeries = {};
 
 	function requestTimeEntries() {
+		console.log("Fetching new time entries");
 		var msg = {type:'entries', start:$scope.startDate.valueOf(), stop:$scope.endDate.valueOf()};
 		chrome.runtime.sendMessage(msg, function(response) {
 				console.log('Got ' + response.entries.length + ' entries');
@@ -48,30 +49,37 @@ function TagBrowserCtrl($scope) {
 		$scope.endDate = end;
 		$scope.endDateLabel = $scope.endDate.format($scope.entryRangeFormat);
 		
+		console.log("Got new time range");
 		requestTimeEntries();
 	}
 
 	function updateFilteredEntrySet() {
+		console.log("Updating filtered entries set");
 		$scope.filteredEntries = [];
+
+		var selectedTags = [];
+
+		for (var tag in $scope.filteredTags) {
+			if ($scope.filteredTags[tag].selected) {
+				selectedTags.push(tag);
+			}
+		}
 
 		$scope.activeEntries.forEach(function(entry) {
 			if ($scope.projects[entry.pid].selected && entry.duration > 0) {
-				var hasActiveTag = false;
-				var numSelectedTags = 0;
+				var entryActiveTags = 0;
 
-				for (var tag in $scope.filteredTags) {
-					if ($scope.filteredTags[tag].selected) {
-						++numSelectedTags;
-					}
-				}
-
-				if (numSelectedTags > 0) {
-					entry.tags.forEach(function(tag) {
-						hasActiveTag = hasActiveTag || $scope.filteredTags[tag].selected;
+				if (selectedTags.length > 0) {
+					selectedTags.forEach(function(tag) {
+						entry.tags.forEach(function(entryTag) {
+							if (entryTag === tag) {
+								++entryActiveTags;
+							}
+						});
 					});
 				}
 
-				if (numSelectedTags == 0 || hasActiveTag) {
+				if (selectedTags.length == 0 || entryActiveTags == selectedTags.length) {
 					$scope.filteredEntries.push(entry);
 				}
 			}
@@ -79,6 +87,7 @@ function TagBrowserCtrl($scope) {
 	}
 
 	function updateFilteredTagSet() {
+		console.log("Updating filtered tag set");
 		$scope.filteredTags = {};
 		$scope.numFilteredTags = 0;
 
@@ -103,15 +112,12 @@ function TagBrowserCtrl($scope) {
 	}
 
 	function updateTagTimeSeries() {
+		console.log("Updating tag time series");
+		$scope.filteredTagTimeSeries = {};
+
 		if ($scope.filteredEntries.length > 0) {
 			var daysInRange = Math.floor(moment.duration($scope.endDate - $scope.startDate).asDays()) + 1;
-			$scope.filteredTagTimeSeries = {};
 			$scope.filteredTagTimeSeries['ALL'] = createTimeArray(daysInRange);
-			for (var tag in $scope.filteredTags) {
-				if (!$scope.filteredTags[tag].selected) {
-					$scope.filteredTagTimeSeries[tag] = createTimeArray(daysInRange);
-				}
-			}
 
 			$scope.filteredEntries.forEach(function(entry) {
 				if (entry.duration > 0) {
@@ -119,7 +125,8 @@ function TagBrowserCtrl($scope) {
 					$scope.filteredTagTimeSeries['ALL'][dayIndex][1] += entry.duration;
 
 					entry.tags.forEach(function(tag) {
-						if (!$scope.filteredTags[tag].selected) {
+						if ($scope.filteredTags[tag] && !$scope.filteredTags[tag].selected) {
+							$scope.filteredTagTimeSeries[tag] = ($scope.filteredTagTimeSeries[tag] || createTimeArray(daysInRange));
 							$scope.filteredTagTimeSeries[tag][dayIndex][1] += entry.duration;
 						}
 					});
@@ -131,8 +138,15 @@ function TagBrowserCtrl($scope) {
 	}
 
 	function processEntrySetChange() {
+		console.log("Processing entry set change");
+
 		$scope.activeProjects = {};
-		$scope.activeTags = {};
+		$scope.filteredTags = {};
+		$scope.filteredTagTimeSeries = {};
+
+		for (var pid in $scope.projects) {
+			$scope.projects[pid].selected = false;
+		}
 
 		$scope.activeEntries.forEach(function(entry) {
 			if (entry.duration > 0) { // There could be entries in progress
@@ -143,35 +157,48 @@ function TagBrowserCtrl($scope) {
 		updateFilteredEntrySet();
 	}
 
-	$scope.allFilter = function(tag) {
+	$scope.allFreeTagsFilter = function(tag) {
 		return tag !== 'ALL';
 	}
 
 	$scope.renderTagTimeSeries = function(tag, plotdiv) {
-		$.plot(document.getElementById(plotdiv), [{
-			data:$scope.filteredTagTimeSeries[tag],
-			color:"#3F3F3F",
-			shadowSize:0,
-			lines:{
-				show:true,
-				lineWidth:1,
-				fill:true,
-				fillColor:"#3F3F3F"
-			},
-			points:{
-				show:false,
-				radius:1
-			}}], {grid:{show:false}});
+		var divElem = document.getElementById(plotdiv);
+
+		if (tag !== undefined && divElem !== undefined && $scope.filteredTagTimeSeries[tag] !== undefined) {
+			console.log("Rendering time series for " + tag + " into " + plotdiv);
+
+			$.plot(divElem, [{
+				data:$scope.filteredTagTimeSeries[tag],
+				color:"#3F3F3F",
+				shadowSize:0,
+				lines:{
+					show:true,
+					lineWidth:1,
+					fill:false,
+					fillColor:"#3F3F3F"
+				},
+				points:{
+					show:true,
+					radius:1
+				},
+				bars:{
+					show:false,
+					fillColor:"#3F3F3F",
+					barWidth:0.1
+				}}], {grid:{show:false}});
+		}
 	}
 
 	$scope.toggleProject = function(project_id) {
 		$scope.projects[project_id].selected = !($scope.projects[project_id].selected || false);
+		console.log("Project " + project_id + " is now selected=" + $scope.projects[project_id].selected);
 		updateFilteredTagSet();
 		updateFilteredEntrySet();
 	}
 
 	$scope.toggleTag = function(tag) {
 		$scope.filteredTags[tag].selected = !($scope.filteredTags[tag].selected || false);
+		console.log("Tag " + tag + " is now selected=" + $scope.filteredTags[tag].selected);
 		updateFilteredEntrySet();
 	}
 
@@ -184,10 +211,12 @@ function TagBrowserCtrl($scope) {
 	}
 
 	$scope.$watch("activeEntries", function(newValue,oldValue) {
+		console.log("Detected change in active entries.");
 		processEntrySetChange();
 	});
 
 	$scope.$watch("filteredEntries", function(newValue,oldValue) {
+		console.log("Detected change in filtered entries.");
 		updateTagTimeSeries();
 	});
 
