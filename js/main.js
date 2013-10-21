@@ -18,6 +18,7 @@ function TagBrowserCtrl($scope) {
 	$scope.filteredTags = {};      // Tags in selected projects
 	$scope.filteredTagsIndex = []; 
 	$scope.filteredTagTimeSeries = {};
+	$scope.filteredTagTimeSeriesIndex = [];
 
 	function requestTimeEntries() {
 		console.log("Fetching new time entries");
@@ -121,6 +122,7 @@ function TagBrowserCtrl($scope) {
 	function updateTagTimeSeries() {
 		console.log("Updating tag time series");
 		$scope.filteredTagTimeSeries = {};
+		$scope.filteredTagTimeSeriesIndex = [];
 
 		if ($scope.filteredEntries.length > 0) {
 			var daysInRange = Math.floor(moment.duration($scope.endDate.valueOf() - $scope.startDate.valueOf()).asDays()) + 1;
@@ -154,7 +156,22 @@ function TagBrowserCtrl($scope) {
 				}
 
 				$scope.filteredTagTimeSeries[tag] = {duration:seriesDuration, durationShare:(seriesDuration/totalDuration), timeSeries:dataSeries};
+
+				$scope.filteredTagTimeSeriesIndex.push(tag);
 			}
+
+			$scope.filteredTagTimeSeriesIndex.sort(function(a, b) {
+				aTagData = $scope.filteredTagTimeSeries[a];
+				bTagData = $scope.filteredTagTimeSeries[b];
+
+				if (a === "ALL" || aTagData.duration > bTagData.duration) {
+					return -1;
+				} else if (aTagData.duration === bTagData.duration) {
+					return 0;
+				}
+				
+				return 1;
+			});
 
 			console.log($scope.filteredTagTimeSeries);
 		}
@@ -182,6 +199,9 @@ function TagBrowserCtrl($scope) {
 
 	$scope.allTagsFilter = function(tag) {
 		return true;
+	}
+
+	$scope.tagTimeSeriesOrdering = function(tag,actual) {
 	}
 
 	$scope.renderTagTimeSeries = function(tag, plotdiv) {

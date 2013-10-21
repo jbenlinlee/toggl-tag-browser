@@ -37,7 +37,7 @@
 
 		<div class="col-sm-8">
 			<table>
-				<tr ng-repeat="(tag,tag_series) in filteredTagTimeSeries">
+				<tr ng-repeat="tag in filteredTagTimeSeriesIndex | orderBy:tag">
 					<td>{{tag}}</td>
 					<td><div class="tag-share-plot" id="plot-pie-{{tag}}">{{renderTagDurationShare(tag,"plot-pie-"+tag)}}</div></td>
 					<td><div class="tag-plot" id="plot-{{tag}}">{{renderTagTimeSeries(tag,"plot-"+tag)}}</div></td>
