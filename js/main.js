@@ -16,6 +16,7 @@ function TagBrowserCtrl($scope) {
 	$scope.activeProjects = {};    // Projects in active entries
 	$scope.filteredEntries = [];   // Entries selected by project and tag
 	$scope.filteredTags = {};      // Tags in selected projects
+	$scope.filteredTagsIndex = []; 
 	$scope.filteredTagTimeSeries = {};
 
 	function requestTimeEntries() {
@@ -101,6 +102,11 @@ function TagBrowserCtrl($scope) {
 				});
 			}
 		})
+
+		$scope.filteredTagsIndex = [];
+		for (var tag in $scope.filteredTags) {
+			$scope.filteredTagsIndex.push(tag);
+		}
 	}
 
 	function createTimeArray(daysInRange) {
@@ -174,8 +180,8 @@ function TagBrowserCtrl($scope) {
 		updateFilteredEntrySet();
 	}
 
-	$scope.allFreeTagsFilter = function(tag) {
-		return tag !== 'ALL';
+	$scope.allTagsFilter = function(tag) {
+		return true;
 	}
 
 	$scope.renderTagTimeSeries = function(tag, plotdiv) {
