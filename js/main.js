@@ -37,6 +37,47 @@ tagBrowserModule.directive('durationShareChart', function() {
 	};
 });
 
+tagBrowserModule.directive('timeseriesChart', function() {
+	return function(scope, elem, attrs) {
+		attrs.$observe('ngTag', function(tag) {
+			var tagData = scope.filteredTagTimeSeries[tag];
+
+			console.debug("rendering time series chart for tag " + tag);
+			console.debug(tagData);
+
+			// Flot
+			$.plot(elem,
+				[{
+					data:tagData.timeSeries,
+					color:"#3F3F3F",
+					shadowSize:0,
+					lines:{
+						show:true,
+						lineWidth:1,
+						fill:false,
+						fillColor:"#3F3F3F"
+					},
+					points:{
+						show:true,
+						radius:2
+					},
+					bars:{
+						show:false,
+						fillColor:"#3F3F3F",
+						barWidth:0.1
+					}
+				}],
+				{
+					grid: {
+						show:false,
+						margin: {top:7, bottom:7, right:7, left:7},
+						hoverable:true
+					}
+				});
+		});
+	};
+});
+
 tagBrowserModule.
 	controller('TagBrowserCtrl', ['$scope', function($scope) {
 		$scope.entryRangeFormat = 'ddd, MMM D YYYY';
@@ -242,42 +283,6 @@ tagBrowserModule.
 		}
 
 		$scope.tagTimeSeriesOrdering = function(tag,actual) {
-		}
-
-		$scope.renderTagTimeSeries = function(tag, plotdiv) {
-			var divElem = document.getElementById(plotdiv);
-
-			if (tag !== undefined && divElem && $scope.filteredTagTimeSeries[tag] !== undefined) {
-				console.log("Rendering time series for " + tag + " into " + plotdiv);
-
-				$.plot(divElem,
-					[{
-						data:$scope.filteredTagTimeSeries[tag].timeSeries,
-						color:"#3F3F3F",
-						shadowSize:0,
-						lines:{
-							show:true,
-							lineWidth:1,
-							fill:false,
-							fillColor:"#3F3F3F"
-						},
-						points:{
-							show:true,
-							radius:2
-						},
-						bars:{
-							show:false,
-							fillColor:"#3F3F3F",
-							barWidth:0.1
-						}}],
-					{
-						grid: {
-							show:false,
-							margin: {top:7, bottom:7, right:7, left:7},
-							hoverable:true
-						}
-					});
-			}
 		}
 
 		$scope.toggleProject = function(project_id) {
