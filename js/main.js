@@ -216,6 +216,8 @@ tagBrowserModule.
 						totalDuration += entry.duration;
 
 						var entryMoment = moment(entry.start);
+						entryMoment.local();
+
 						var entryDate = moment(entryMoment.format("YYYY-MM-DD"));
 						var dayIndex = Math.floor(moment.duration(entryDate.valueOf() - $scope.startDate.valueOf()).asDays());
 						$scope.filteredTagTimeSeries['ALL'][dayIndex][1] += entry.duration;
