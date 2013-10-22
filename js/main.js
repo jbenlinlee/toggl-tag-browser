@@ -1,4 +1,43 @@
-angular.module('toggl-tag-browser', []).
+var tagBrowserModule = angular.module('toggl-tag-browser', []);
+
+tagBrowserModule.directive('durationShareChart', function() {
+	return function(scope, elem, attrs) {
+		attrs.$observe('ngTag', function(tag) {
+			var tagData = scope.filteredTagTimeSeries[tag];
+
+			console.debug("rendering duration share chart for tag " + tag);
+			console.debug(tagData);
+
+			var plotData = [
+				{label:tag, data:tagData.durationShare},
+				{label:"other", data:(1 - tagData.durationShare)}
+			];
+		
+			// Flot	
+			$.plot(elem, plotData, {
+				series: {
+					pie: {
+						show:true,
+						radius:1,
+						stroke: {width:0},
+						label: {show:false}
+					}
+				},
+				colors: ["#F5D908", "#3F3F3F"],
+				legend: {
+					show: false
+				}});
+
+			// Bootstrap tooltip
+			var popupText = Math.floor(tagData.durationShare * 100) + "%; " +
+				moment.duration(tagData.duration * 1000).humanize();
+
+			$(elem).tooltip({title:popupText, placement:"right"});
+		});
+	};
+});
+
+tagBrowserModule.
 	controller('TagBrowserCtrl', ['$scope', function($scope) {
 		$scope.entryRangeFormat = 'ddd, MMM D YYYY';
 
@@ -238,38 +277,6 @@ angular.module('toggl-tag-browser', []).
 							hoverable:true
 						}
 					});
-			}
-		}
-
-		$scope.renderTagDurationShare = function(tag, plotdiv) {
-			var divElem = document.getElementById(plotdiv);
-			var tagData = $scope.filteredTagTimeSeries[tag];
-
-			if (tag !== undefined && divElem && tagData !== undefined) {
-				console.log("Rendering duration share for " + tag + " into " + plotdiv);
-
-				var plotData = [
-					{label:tag, data:tagData.durationShare},
-					{label:"other", data:(1 - tagData.durationShare)}
-				];
-			
-				$.plot(divElem, plotData, {
-					series: {
-						pie: {
-							show:true,
-							radius:1,
-							stroke: {width:0},
-							label: {show:false}
-						}
-					},
-					colors: ["#F5D908", "#3F3F3F"],
-					legend: {
-						show: false
-					}});
-
-				var popupText = Math.floor(tagData.durationShare * 100) + "%; " + moment.duration(tagData.duration * 1000).humanize();
-
-				$(divElem).tooltip({title:popupText, placement:"right"});
 			}
 		}
 

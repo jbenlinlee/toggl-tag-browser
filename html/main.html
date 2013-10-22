@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html ng-app='toggl-tag-browser' ng-csp lang="en">
+<html ng-app="toggl-tag-browser" ng-csp lang="en">
 <head>
 	<title>toggl-tag-browser</title>
 
@@ -39,7 +39,7 @@
 			<table>
 				<tr ng-repeat="tag in filteredTagTimeSeriesIndex | orderBy:tag">
 					<td><a href="#" ng-click="toggleTag(tag)">{{tag}}</a></td>
-					<td><div class="tag-share-plot" id="plot-pie-{{tag}}">{{renderTagDurationShare(tag,"plot-pie-"+tag)}}</div></td>
+					<td><div class="tag-share-plot" ng-tag="{{tag}}" duration-share-chart></div></td>
 					<td><div class="tag-plot" id="plot-{{tag}}">{{renderTagTimeSeries(tag,"plot-"+tag)}}</div></td>
 				</tr>
 			</table>
