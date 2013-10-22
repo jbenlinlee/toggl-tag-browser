@@ -1,5 +1,11 @@
 var tagBrowserModule = angular.module('toggl-tag-browser', []);
 
+tagBrowserModule.filter('datepickerFormat', function() {
+	return function(momentDate) {
+		return momentDate.format('ddd, MMM D YYYY');
+	};
+});
+
 tagBrowserModule.directive('durationShareChart', function() {
 	return function(scope, elem, attrs) {
 		attrs.$observe('ngTag', function(tag) {
@@ -80,14 +86,10 @@ tagBrowserModule.directive('timeseriesChart', function() {
 
 tagBrowserModule.
 	controller('TagBrowserCtrl', ['$scope', function($scope) {
-		$scope.entryRangeFormat = 'ddd, MMM D YYYY';
-
 		$scope.endDate = moment(moment().format("YYYY-MM-DD"));
-		$scope.endDateLabel = $scope.endDate.format($scope.entryRangeFormat);
 
 		$scope.startDate = moment($scope.endDate);
 		$scope.startDate.subtract('days',7);
-		$scope.startDateLabel = $scope.startDate.format($scope.entryRangeFormat);
 	
 		$scope.projects = {};    // All projects
 		$scope.workspaces = {};  // All workspaces
@@ -129,9 +131,7 @@ tagBrowserModule.
 		
 		function changeEntryRange(start,end) {
 			$scope.startDate = moment(start.format("YYYY-MM-DD"), "YYYY-MM-DD");
-			$scope.startDateLabel = $scope.startDate.format($scope.entryRangeFormat);
 			$scope.endDate = moment(end.format("YYYY-MM-DD", "YYYY-MM-DD"));
-			$scope.endDateLabel = $scope.endDate.format($scope.entryRangeFormat);
 		
 			console.log("Got new time range");
 			requestTimeEntries();
