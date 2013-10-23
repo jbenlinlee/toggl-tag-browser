@@ -2,7 +2,7 @@ var tagBrowserModule = angular.module('toggl-tag-browser', []);
 
 tagBrowserModule.filter('datepickerFormat', function() {
 	return function(momentDate) {
-		return momentDate.format('ddd, MMM D YYYY');
+		return momentDate.format('MMM D, YYYY');
 	};
 });
 
