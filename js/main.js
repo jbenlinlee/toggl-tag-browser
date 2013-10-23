@@ -8,7 +8,7 @@ tagBrowserModule.filter('datepickerFormat', function() {
 
 tagBrowserModule.directive('durationShareChart', function() {
 	return function(scope, elem, attrs) {
-		attrs.$observe('ngTag', function(tag) {
+		attrs.$observe('ttbTag', function(tag) {
 			var tagData = scope.filteredTagTimeSeries[tag];
 
 			console.debug("rendering duration share chart for tag " + tag);
@@ -45,7 +45,7 @@ tagBrowserModule.directive('durationShareChart', function() {
 
 tagBrowserModule.directive('timeseriesChart', function() {
 	return function(scope, elem, attrs) {
-		attrs.$observe('ngTag', function(tag) {
+		attrs.$observe('ttbTag', function(tag) {
 			var tagData = scope.filteredTagTimeSeries[tag];
 
 			console.debug("rendering time series chart for tag " + tag);

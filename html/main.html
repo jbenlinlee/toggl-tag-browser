@@ -39,8 +39,8 @@
 			<table>
 				<tr ng-repeat="tag in filteredTagTimeSeriesIndex | orderBy:tag">
 					<td><a href="#" ng-click="toggleTag(tag)">{{tag}}</a></td>
-					<td><div class="tag-share-plot" ng-tag="{{tag}}" duration-share-chart></div></td>
-					<td><div class="tag-plot" ng-tag="{{tag}}" timeseries-chart></div></td>
+					<td><div class="tag-share-plot" ttb-tag="{{tag}}" duration-share-chart></div></td>
+					<td><div class="tag-plot" ttb-tag="{{tag}}" timeseries-chart></div></td>
 				</tr>
 			</table>
 		</div>
