@@ -23,6 +23,8 @@ tagBrowserModule.directive('eventRangePicker', function(eventRange) {
 
 			console.debug("Event range changed: start=" + start.format(format) + "; end=" + end.format(format));
 			elem.html(start.format(format) + " &mdash; " + end.format(format));
+
+			scope.updateTimeEntries();
 		}
 
 		function asyncSetRange(start, end) {
@@ -159,7 +161,7 @@ tagBrowserModule.
 		}
 
 		function startup() {
-			requestProjects(requestTimeEntries);
+			requestProjects(function() { });
 		}
 
 		function updateFilteredEntrySet() {
@@ -333,6 +335,10 @@ tagBrowserModule.
 			return ($scope.filteredTags[tag].selected || false) ? "btn-success" : "btn-default";
 		}
 
+		$scope.updateTimeEntries = function() {
+			requestTimeEntries();
+		}
+
 		$scope.$watch("activeEntries", function(newValue,oldValue) {
 			console.log("Detected change in active entries.");
 			processEntrySetChange();
@@ -341,16 +347,6 @@ tagBrowserModule.
 		$scope.$watch("filteredEntries", function(newValue,oldValue) {
 			console.log("Detected change in filtered entries.");
 			updateTagTimeSeries();
-		});
-
-		$scope.$watch("eventRange.start", function(newValue, oldValue) {
-			console.debug("Detected event range change in TagBrowserController");
-			requestTimeEntries();
-		});
-
-		$scope.$watch("eventRange.end", function(newValue, oldValue) {
-			console.debug("Detected event range change in TagBrowserController");
-			requestTimeEntries();
 		});
 
 		$(document).ready(function() {
