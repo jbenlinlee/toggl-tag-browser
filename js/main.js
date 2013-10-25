@@ -18,16 +18,24 @@ tagBrowserModule.directive('eventRangePicker', function(eventRange) {
 
 	return function(scope, elem, attrs) {
 		function setRange(start, end) {
+			eventRange.start = start;
+			eventRange.end = end;
+
 			console.debug("Event range changed: start=" + start.format(format) + "; end=" + end.format(format));
 			elem.html(start.format(format) + " &mdash; " + end.format(format));
-			scope.changeEntryRange(start,end); // TODO this should prob be another service
+		}
+
+		function asyncSetRange(start, end) {
+			scope.$apply(function() {
+				setRange(start, end);
+			});
 		}
 			
 		$(elem).daterangepicker({
 			startDate: eventRange.start,
 			endDate: eventRange.end
 		}, function(start, end) { 
-			setRange(start, end);
+			asyncSetRange(start, end);
 		});
 
 		setRange(eventRange.start, eventRange.end);
@@ -114,7 +122,8 @@ tagBrowserModule.directive('timeseriesChart', function() {
 
 tagBrowserModule.
 	controller('TagBrowserCtrl', ['$scope', 'eventRange', function($scope, eventRange) {
-	
+		$scope.eventRange = eventRange;
+
 		$scope.projects = {};    // All projects
 		$scope.workspaces = {};  // All workspaces
 		$scope.tags = {};
@@ -128,7 +137,7 @@ tagBrowserModule.
 		$scope.filteredTagTimeSeriesIndex = [];
 
 		function requestTimeEntries() {
-			console.log("Fetching new time entries");
+			console.debug("Fetching new time entries; start=" + eventRange.start.format("MMM DD, YYYY") + "; end=" + eventRange.end.format("MMM DD, YYYY"));
 			var msg = {type:'entries', start:eventRange.start.valueOf(), stop:eventRange.end.valueOf()};
 			chrome.runtime.sendMessage(msg, function(response) {
 					console.log('Got ' + response.entries.length + ' entries');
@@ -151,14 +160,6 @@ tagBrowserModule.
 
 		function startup() {
 			requestProjects(requestTimeEntries);
-		}
-		
-		$scope.changeEntryRange = function(start,end) {
-			eventRange.start = moment(start.format("YYYY-MM-DD"), "YYYY-MM-DD");
-			eventRange.end = moment(end.format("YYYY-MM-DD", "YYYY-MM-DD"));
-		
-			console.log("Got new time range");
-			requestTimeEntries();
 		}
 
 		function updateFilteredEntrySet() {
@@ -340,6 +341,16 @@ tagBrowserModule.
 		$scope.$watch("filteredEntries", function(newValue,oldValue) {
 			console.log("Detected change in filtered entries.");
 			updateTagTimeSeries();
+		});
+
+		$scope.$watch("eventRange.start", function(newValue, oldValue) {
+			console.debug("Detected event range change in TagBrowserController");
+			requestTimeEntries();
+		});
+
+		$scope.$watch("eventRange.end", function(newValue, oldValue) {
+			console.debug("Detected event range change in TagBrowserController");
+			requestTimeEntries();
 		});
 
 		$(document).ready(function() {
