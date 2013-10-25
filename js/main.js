@@ -1,8 +1,36 @@
 var tagBrowserModule = angular.module('toggl-tag-browser', []);
 
-tagBrowserModule.filter('datepickerFormat', function() {
-	return function(momentDate) {
-		return momentDate.format('MMM D, YYYY');
+tagBrowserModule.factory('eventRange', function() {
+	var endDate = moment(moment().format("YYYY-MM-DD"));
+	var startDate = moment(endDate);
+	startDate.subtract('days',7);
+
+	console.debug("eventRange service instantiating");
+
+	return {
+		start: startDate,
+		end: endDate
+	};
+});
+
+tagBrowserModule.directive('eventRangePicker', function(eventRange) {
+	var format = 'MMM D, YYYY';
+
+	return function(scope, elem, attrs) {
+		function setRange(start, end) {
+			console.debug("Event range changed: start=" + start.format(format) + "; end=" + end.format(format));
+			elem.html(start.format(format) + " &mdash; " + end.format(format));
+			scope.changeEntryRange(start,end); // TODO this should prob be another service
+		}
+			
+		$(elem).daterangepicker({
+			startDate: eventRange.start,
+			endDate: eventRange.end
+		}, function(start, end) { 
+			setRange(start, end);
+		});
+
+		setRange(eventRange.start, eventRange.end);
 	};
 });
 
@@ -85,11 +113,7 @@ tagBrowserModule.directive('timeseriesChart', function() {
 });
 
 tagBrowserModule.
-	controller('TagBrowserCtrl', ['$scope', function($scope) {
-		$scope.endDate = moment(moment().format("YYYY-MM-DD"));
-
-		$scope.startDate = moment($scope.endDate);
-		$scope.startDate.subtract('days',7);
+	controller('TagBrowserCtrl', ['$scope', 'eventRange', function($scope, eventRange) {
 	
 		$scope.projects = {};    // All projects
 		$scope.workspaces = {};  // All workspaces
@@ -105,7 +129,7 @@ tagBrowserModule.
 
 		function requestTimeEntries() {
 			console.log("Fetching new time entries");
-			var msg = {type:'entries', start:$scope.startDate.valueOf(), stop:$scope.endDate.valueOf()};
+			var msg = {type:'entries', start:eventRange.start.valueOf(), stop:eventRange.end.valueOf()};
 			chrome.runtime.sendMessage(msg, function(response) {
 					console.log('Got ' + response.entries.length + ' entries');
 					$scope.$apply(function() {
@@ -129,9 +153,9 @@ tagBrowserModule.
 			requestProjects(requestTimeEntries);
 		}
 		
-		function changeEntryRange(start,end) {
-			$scope.startDate = moment(start.format("YYYY-MM-DD"), "YYYY-MM-DD");
-			$scope.endDate = moment(end.format("YYYY-MM-DD", "YYYY-MM-DD"));
+		$scope.changeEntryRange = function(start,end) {
+			eventRange.start = moment(start.format("YYYY-MM-DD"), "YYYY-MM-DD");
+			eventRange.end = moment(end.format("YYYY-MM-DD", "YYYY-MM-DD"));
 		
 			console.log("Got new time range");
 			requestTimeEntries();
@@ -206,7 +230,7 @@ tagBrowserModule.
 			$scope.filteredTagTimeSeriesIndex = [];
 
 			if ($scope.filteredEntries.length > 0) {
-				var daysInRange = Math.floor(moment.duration($scope.endDate.valueOf() - $scope.startDate.valueOf()).asDays()) + 1;
+				var daysInRange = Math.floor(moment.duration(eventRange.end.valueOf() - eventRange.start.valueOf()).asDays()) + 1;
 				$scope.filteredTagTimeSeries['ALL'] = createTimeArray(daysInRange);
 
 				var totalDuration = 0;
@@ -219,7 +243,7 @@ tagBrowserModule.
 						entryMoment.local();
 
 						var entryDate = moment(entryMoment.format("YYYY-MM-DD"));
-						var dayIndex = Math.floor(moment.duration(entryDate.valueOf() - $scope.startDate.valueOf()).asDays());
+						var dayIndex = Math.floor(moment.duration(entryDate.valueOf() - eventRange.start.valueOf()).asDays());
 						$scope.filteredTagTimeSeries['ALL'][dayIndex][1] += entry.duration;
 
 						entry.tags.forEach(function(tag) {
@@ -319,12 +343,6 @@ tagBrowserModule.
 		});
 
 		$(document).ready(function() {
-			$('div#reportrange').daterangepicker({
-				startDate:$scope.startDate,
-				endDate:$scope.endDate
-			}, function(start,end) { 
-				$scope.$apply(changeEntryRange(start,end));
-			});
 
 			startup();
 		});

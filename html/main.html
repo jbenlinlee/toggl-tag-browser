@@ -12,9 +12,7 @@
 <body ng-controller="TagBrowserCtrl">
 	<div class="row">
 		<div class="col-sm-4">
-			<div id="reportrange" class="reportrange well">
-				<span id="entryrange">{{startDate | datepickerFormat}} - {{endDate | datepickerFormat}}</span>
-			</div>
+			<div id="reportrange" class="reportrange well" event-range-picker></div>
 
 			<div id="projects" class="well">
 				<h4>Projects</h4>
