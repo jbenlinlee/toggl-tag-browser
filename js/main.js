@@ -9,7 +9,9 @@ tagBrowserModule.factory('eventRange', function() {
 
 	return {
 		start: startDate,
-		end: endDate
+		end: endDate,
+		verid: 0,
+		update: function(start, end) { this.start = start; this.end = end; ++this.verid; }
 	};
 });
 
@@ -18,26 +20,17 @@ tagBrowserModule.directive('eventRangePicker', function(eventRange) {
 
 	return function(scope, elem, attrs) {
 		function setRange(start, end) {
-			eventRange.start = start;
-			eventRange.end = end;
+			eventRange.update(start, end);
 
 			console.debug("Event range changed: start=" + start.format(format) + "; end=" + end.format(format));
 			elem.html(start.format(format) + " &mdash; " + end.format(format));
-
-			scope.updateTimeEntries();
-		}
-
-		function asyncSetRange(start, end) {
-			scope.$apply(function() {
-				setRange(start, end);
-			});
 		}
 			
 		$(elem).daterangepicker({
 			startDate: eventRange.start,
 			endDate: eventRange.end
 		}, function(start, end) { 
-			asyncSetRange(start, end);
+			setRange(start, end);
 		});
 
 		setRange(eventRange.start, eventRange.end);
@@ -335,9 +328,10 @@ tagBrowserModule.
 			return ($scope.filteredTags[tag].selected || false) ? "btn-success" : "btn-default";
 		}
 
-		$scope.updateTimeEntries = function() {
+		$scope.$watch("eventRange.verid", function(newValue, oldValue) {
+			console.debug("Detected change in event range via verid");
 			requestTimeEntries();
-		}
+		});
 
 		$scope.$watch("activeEntries", function(newValue,oldValue) {
 			console.log("Detected change in active entries.");
