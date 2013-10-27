@@ -40,19 +40,27 @@ tagBrowserModule.directive('eventRangePicker', function(eventRange) {
 tagBrowserModule.factory('togglProjects', function() {
 	var msg = {type:'projects'};
 	var projects = {};
-	var workspaces = {};
 
 	chrome.runtime.sendMessage(msg, function(response) {
 		console.debug("Received project and workspace data");
-		projects = response.projects;
-		workspaces = response.workspaces;
+		for (var pid in response.projects) {
+			console.debug("Got project pid=" + pid + "; name=" + response.projects[pid].name);
+			projects[pid] = response.projects[pid];
+		}
 	});
 
 	return {
-		projects: projects,
-		workspaces: workspaces
+		projects: projects
 	};
 });
+
+tagBrowserModule.directive('projectButton', ['togglProjects', function(togglProjects) {
+	return function(scope, elem, attrs) {
+		attrs.$observe('ttbProject', function(pid) {
+			elem.html(togglProjects.projects[pid].name);
+		});
+	};
+}]);
 
 tagBrowserModule.directive('durationShareChart', function() {
 	return function(scope, elem, attrs) {
@@ -136,7 +144,6 @@ tagBrowserModule.
 	controller('TagBrowserCtrl', ['$scope', 'eventRange', 'togglProjects', function($scope, eventRange, togglProjects) {
 		$scope.eventRange = eventRange;
 
-		$scope.projects = togglProjects.projects;    // All projects
 		$scope.tags = {};
 
 		$scope.activeEntries = [];     // Entries in selected dates
@@ -172,7 +179,7 @@ tagBrowserModule.
 			}
 
 			$scope.activeEntries.forEach(function(entry) {
-				if ($scope.projects[entry.pid].selected && entry.duration > 0) {
+				if (togglProjects.projects[entry.pid].selected && entry.duration > 0) {
 					var entryActiveTags = 0;
 
 					if (selectedTags.length > 0) {
@@ -198,7 +205,7 @@ tagBrowserModule.
 			$scope.numFilteredTags = 0;
 
 			$scope.activeEntries.forEach(function(entry) {
-				if ($scope.projects[entry.pid].selected) {
+				if (togglProjects.projects[entry.pid].selected) {
 					entry.tags.forEach(function(tag) {
 						if (tag.length > 0) {
 							$scope.filteredTags[tag] = {tag:tag, selected:false};
@@ -289,8 +296,8 @@ tagBrowserModule.
 			$scope.filteredTags = {};
 			$scope.filteredTagTimeSeries = {};
 
-			for (var pid in $scope.projects) {
-				$scope.projects[pid].selected = false;
+			for (var pid in togglProjects.projects) {
+				togglProjects.projects[pid].selected = false;
 			}
 
 			$scope.activeEntries.forEach(function(entry) {
@@ -310,8 +317,8 @@ tagBrowserModule.
 		}
 
 		$scope.toggleProject = function(project_id) {
-			$scope.projects[project_id].selected = !($scope.projects[project_id].selected || false);
-			console.log("Project " + project_id + " is now selected=" + $scope.projects[project_id].selected);
+			togglProjects.projects[project_id].selected = !(togglProjects.projects[project_id].selected || false);
+			console.log("Project " + project_id + " is now selected=" + togglProjects.projects[project_id].selected);
 			updateFilteredTagSet();
 			updateFilteredEntrySet();
 		}
@@ -323,7 +330,7 @@ tagBrowserModule.
 		}
 
 		$scope.btnForProject = function(project_id) {
-			return ($scope.projects[project_id].selected || false) ? "btn-success" : "btn-default";
+			return (togglProjects.projects[project_id].selected || false) ? "btn-success" : "btn-default";
 		}
 
 		$scope.btnForTag = function(tag) {
