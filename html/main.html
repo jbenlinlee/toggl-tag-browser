@@ -27,7 +27,7 @@
 				<h4>Tags</h4>
 				<ul class="filterList">
 					<li ng-repeat="tag in filteredTagsIndex | filter:allTagsFilter">
-						<button type="button" class="btn {{btnForTag(tag)}} btn-xs" ng-click="toggleTag(tag)">{{tag}}</button>
+						<button type="button" class="btn btn-xs" ng-click="toggleTag(tag)" ttb-tag="{{tag}}" tag-button></button>
 					</li>
 				</ul>
 			</div>

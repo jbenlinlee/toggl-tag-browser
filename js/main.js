@@ -68,6 +68,19 @@ tagBrowserModule.directive('projectButton', ['togglProjects', function(togglProj
 	};
 }]);
 
+tagBrowserModule.directive('tagButton', function() {
+	return function(scope, elem, attrs) {
+		attrs.$observe('ttbTag', function(tag) {
+			elem.html(tag);
+			if (scope.filteredTags[tag] && scope.filteredTags[tag].selected) {
+				elem.addClass('btn-success');
+			} else {
+				elem.addClass('btn-default');
+			}
+		});
+	};
+});
+
 tagBrowserModule.directive('durationShareChart', function() {
 	return function(scope, elem, attrs) {
 		attrs.$observe('ttbTag', function(tag) {
@@ -333,10 +346,6 @@ tagBrowserModule.
 			$scope.filteredTags[tag].selected = !($scope.filteredTags[tag].selected || false);
 			console.log("Tag " + tag + " is now selected=" + $scope.filteredTags[tag].selected);
 			updateFilteredEntrySet();
-		}
-
-		$scope.btnForTag = function(tag) {
-			return ($scope.filteredTags[tag].selected || false) ? "btn-success" : "btn-default";
 		}
 
 		$scope.$watch("eventRange.verid", function(newValue, oldValue) {
