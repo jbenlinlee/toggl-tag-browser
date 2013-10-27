@@ -160,16 +160,41 @@ tagBrowserModule.
 		$scope.filteredTagTimeSeries = {};
 		$scope.filteredTagTimeSeriesIndex = [];
 
+
+		/*
+		- Fetch entries for selected time range
+		- Filter by time range into activeEntries (since API sometimes returns too much)
+		- Extract projects and tags present, map back to entries
+		- ==============================================================================
+		- Apply filter to generate filteredEntries
+		- Calculate tag time series and duration shares
+		*/
+
 		function requestTimeEntries() {
 			console.debug("Fetching new time entries; start=" + eventRange.start.format("MMM DD, YYYY") + "; end=" + eventRange.end.format("MMM DD, YYYY"));
 			var msg = {type:'entries', start:eventRange.start.valueOf(), stop:eventRange.end.valueOf()};
 			chrome.runtime.sendMessage(msg, function(response) {
-					console.log('Got ' + response.entries.length + ' entries');
-					$scope.$apply(function() {
-						$scope.activeEntries = response.entries;
-						$scope.filteredEntries = $scope.activeEntries;
+				console.log('Got ' + response.entries.length + ' entries');
+				$scope.$apply(function() {
+
+					// Have to check start and end dates since Toggl API
+					// has been returning events outside the requested
+					// range.
+
+					$scope.activeEntries = [];
+
+					response.entries.forEach(function(entry) {
+						// Discard entries that are in progress
+						if (entry.duration > 0) {
+							var startMoment = moment(entry.start);
+							startMoment.local();
+							if (startMoment.valueOf() >= eventRange.start.valueOf() && startMoment.valueOf() <= eventRange.end.valueOf()) {
+								$scope.activeEntries.push(entry);
+							}
+						}
 					});
 				});
+			});
 		}
 
 		function updateFilteredEntrySet() {
