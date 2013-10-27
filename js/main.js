@@ -46,6 +46,7 @@ tagBrowserModule.factory('togglProjects', function() {
 		for (var pid in response.projects) {
 			console.debug("Got project pid=" + pid + "; name=" + response.projects[pid].name);
 			projects[pid] = response.projects[pid];
+			projects[pid].selected = false;
 		}
 	});
 
@@ -58,6 +59,11 @@ tagBrowserModule.directive('projectButton', ['togglProjects', function(togglProj
 	return function(scope, elem, attrs) {
 		attrs.$observe('ttbProject', function(pid) {
 			elem.html(togglProjects.projects[pid].name);
+			if (togglProjects.projects[pid].selected) {
+				elem.addClass('btn-success');
+			} else {
+				elem.addClass('btn-default');
+			}
 		});
 	};
 }]);
@@ -327,10 +333,6 @@ tagBrowserModule.
 			$scope.filteredTags[tag].selected = !($scope.filteredTags[tag].selected || false);
 			console.log("Tag " + tag + " is now selected=" + $scope.filteredTags[tag].selected);
 			updateFilteredEntrySet();
-		}
-
-		$scope.btnForProject = function(project_id) {
-			return (togglProjects.projects[project_id].selected || false) ? "btn-success" : "btn-default";
 		}
 
 		$scope.btnForTag = function(tag) {
