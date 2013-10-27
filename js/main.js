@@ -177,15 +177,16 @@ tagBrowserModule.
 				console.log('Got ' + response.entries.length + ' entries');
 				$scope.$apply(function() {
 
-					// Have to check start and end dates since Toggl API
-					// has been returning events outside the requested
-					// range.
-
 					$scope.activeEntries = [];
 
 					response.entries.forEach(function(entry) {
 						// Discard entries that are in progress
+
 						if (entry.duration > 0) {
+							// Have to check start and end dates since Toggl API
+							// has been returning events outside the requested
+							// range.
+
 							var startMoment = moment(entry.start);
 							startMoment.local();
 							if (startMoment.valueOf() >= eventRange.start.valueOf() && startMoment.valueOf() <= eventRange.end.valueOf()) {
