@@ -37,6 +37,23 @@ tagBrowserModule.directive('eventRangePicker', function(eventRange) {
 	};
 });
 
+tagBrowserModule.factory('togglProjects', function() {
+	var msg = {type:'projects'};
+	var projects = {};
+	var workspaces = {};
+
+	chrome.runtime.sendMessage(msg, function(response) {
+		console.debug("Received project and workspace data");
+		projects = response.projects;
+		workspaces = response.workspaces;
+	});
+
+	return {
+		projects: projects,
+		workspaces: workspaces
+	};
+});
+
 tagBrowserModule.directive('durationShareChart', function() {
 	return function(scope, elem, attrs) {
 		attrs.$observe('ttbTag', function(tag) {
@@ -116,11 +133,10 @@ tagBrowserModule.directive('timeseriesChart', function() {
 });
 
 tagBrowserModule.
-	controller('TagBrowserCtrl', ['$scope', 'eventRange', function($scope, eventRange) {
+	controller('TagBrowserCtrl', ['$scope', 'eventRange', 'togglProjects', function($scope, eventRange, togglProjects) {
 		$scope.eventRange = eventRange;
 
-		$scope.projects = {};    // All projects
-		$scope.workspaces = {};  // All workspaces
+		$scope.projects = togglProjects.projects;    // All projects
 		$scope.tags = {};
 
 		$scope.activeEntries = [];     // Entries in selected dates
@@ -141,20 +157,6 @@ tagBrowserModule.
 						$scope.filteredEntries = $scope.activeEntries;
 					});
 				});
-		}
-
-		function requestProjects(callback) {
-			var msg = {type:'projects'};
-			chrome.runtime.sendMessage(msg, function(response) {
-				$scope.projects = response.projects;
-				$scope.workspaces = response.workspaces;
-				console.log(response);
-				callback();
-			})
-		}
-
-		function startup() {
-			requestProjects(function() { });
 		}
 
 		function updateFilteredEntrySet() {
@@ -342,10 +344,4 @@ tagBrowserModule.
 			console.log("Detected change in filtered entries.");
 			updateTagTimeSeries();
 		});
-
-		$(document).ready(function() {
-
-			startup();
-		});
 	}]);
-
