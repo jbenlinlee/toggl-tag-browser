@@ -58,12 +58,22 @@ tagBrowserModule.factory('togglProjects', function() {
 tagBrowserModule.directive('projectButton', ['togglProjects', function(togglProjects) {
 	return function(scope, elem, attrs) {
 		attrs.$observe('ttbProject', function(pid) {
-			elem.html(togglProjects.projects[pid].name);
-			if (togglProjects.projects[pid].selected) {
-				elem.addClass('btn-success');
-			} else {
-				elem.addClass('btn-default');
+			function setButtonClass() {
+				if (scope.activeProjects[pid].infilter) {
+					elem.removeClass('btn-default');
+					elem.addClass('btn-success');
+				} else {
+					elem.removeClass('btn-success');
+					elem.addClass('btn-default');
+				}
 			}
+
+			elem.html(togglProjects.projects[pid].name);
+			setButtonClass();
+
+			scope.$watch('activeProjects.' + pid + '.infilter', function(newValue, oldValue) {
+				setButtonClass();
+			});
 		});
 	};
 }]);
@@ -198,20 +208,50 @@ tagBrowserModule.
 			});
 		}
 
+		function extractFilterData() {
+			console.log("Processing entry set change");
+
+			$scope.activeProjects = {};
+			$scope.activeTags = {};
+			$scope.filteredTagTimeSeries = {};
+
+			var activeProjects = {};
+			var activeTags = {};
+
+			$scope.activeEntries.forEach(function(entry) {
+				activeProjects[entry.pid] = activeProjects[entry.pid] || {pid: entry.pid, infilter: false, entries: []};
+				activeProjects[entry.pid].entries.push(entry);
+
+				entry.tags.forEach(function(tag) {
+					activeTags[tag] = activeTags[tag] || {tag: tag, infilter: false, entries: []};
+					activeTags[tag].entries.push(entry);
+				});
+			});
+
+			$scope.activeProjects = activeProjects;
+			$scope.activeTags = activeTags;
+		}
+
 		function updateFilteredEntrySet() {
 			console.log("Updating filtered entries set");
 			$scope.filteredEntries = [];
 	
 			var selectedTags = [];
-
-			for (var tag in $scope.filteredTags) {
-				if ($scope.filteredTags[tag].selected) {
+			for (var tag in $scope.activeTags) {
+				if ($scope.activeTags[tag].infilter) {
 					selectedTags.push(tag);
 				}
 			}
 
+			var selectedProjects = [];
+			for (var pid in $scope.activeProjects) {
+				if ($scope.activeProjects[pid].infilter) {
+					selectedProjects.push(pid);
+				}
+			}
+
 			$scope.activeEntries.forEach(function(entry) {
-				if (togglProjects.projects[entry.pid].selected && entry.duration > 0) {
+				if (selectedProjects.length == 0 || $scope.activeProjects[entry.pid].infilter) {
 					var entryActiveTags = 0;
 
 					if (selectedTags.length > 0) {
@@ -267,7 +307,8 @@ tagBrowserModule.
 			$scope.filteredTagTimeSeriesIndex = [];
 
 			if ($scope.filteredEntries.length > 0) {
-				var daysInRange = Math.floor(moment.duration(eventRange.end.valueOf() - eventRange.start.valueOf()).asDays()) + 1;
+				var rangeDuration = eventRange.end.valueOf() - eventRange.start.valueOf();
+				var daysInRange = Math.floor(moment.duration(rangeDuration).asDays()) + 1;
 				$scope.filteredTagTimeSeries['ALL'] = createTimeArray(daysInRange);
 
 				var totalDuration = 0;
@@ -284,7 +325,7 @@ tagBrowserModule.
 						$scope.filteredTagTimeSeries['ALL'][dayIndex][1] += entry.duration;
 
 						entry.tags.forEach(function(tag) {
-							if ($scope.filteredTags[tag] && !$scope.filteredTags[tag].selected) {
+							if ($scope.activeTags[tag] && !$scope.activeTags[tag].infilter) {
 								$scope.filteredTagTimeSeries[tag] = ($scope.filteredTagTimeSeries[tag] || createTimeArray(daysInRange));
 								$scope.filteredTagTimeSeries[tag][dayIndex][1] += entry.duration;
 							}
@@ -321,26 +362,6 @@ tagBrowserModule.
 			}
 		}
 
-		function processEntrySetChange() {
-			console.log("Processing entry set change");
-
-			$scope.activeProjects = {};
-			$scope.filteredTags = {};
-			$scope.filteredTagTimeSeries = {};
-
-			for (var pid in togglProjects.projects) {
-				togglProjects.projects[pid].selected = false;
-			}
-
-			$scope.activeEntries.forEach(function(entry) {
-				if (entry.duration > 0) { // There could be entries in progress
-					$scope.activeProjects[entry.pid] = ($scope.activeProjects[entry.pid] || 0) + entry.duration;
-				}
-			});
-
-			updateFilteredEntrySet();
-		}
-
 		$scope.allTagsFilter = function(tag) {
 			return true;
 		}
@@ -349,15 +370,15 @@ tagBrowserModule.
 		}
 
 		$scope.toggleProject = function(project_id) {
-			togglProjects.projects[project_id].selected = !(togglProjects.projects[project_id].selected || false);
-			console.log("Project " + project_id + " is now selected=" + togglProjects.projects[project_id].selected);
+			$scope.activeProjects[project_id].infilter = !$scope.activeProjects[project_id].infilter;
+			console.log("Project " + project_id + " is now selected=" + $scope.activeProjects[project_id].infilter);
 			updateFilteredTagSet();
 			updateFilteredEntrySet();
 		}
 
 		$scope.toggleTag = function(tag) {
-			$scope.filteredTags[tag].selected = !($scope.filteredTags[tag].selected || false);
-			console.log("Tag " + tag + " is now selected=" + $scope.filteredTags[tag].selected);
+			$scope.activeTags[tag].infilter = !$scope.activeTags[tag].infilter;
+			console.log("Tag " + tag + " is now selected=" + $scope.activeTags[tag].infilter);
 			updateFilteredEntrySet();
 		}
 
@@ -372,7 +393,8 @@ tagBrowserModule.
 
 		$scope.$watch("activeEntries", function(newValue,oldValue) {
 			console.log("Detected change in active entries.");
-			processEntrySetChange();
+			extractFilterData();
+			updateFilteredEntrySet();
 		});
 
 		$scope.$watch("filteredEntries", function(newValue,oldValue) {
