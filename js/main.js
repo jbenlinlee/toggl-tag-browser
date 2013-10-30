@@ -30,7 +30,7 @@ tagBrowserModule.directive('eventRangePicker', function(eventRange) {
 			startDate: eventRange.start,
 			endDate: eventRange.end
 		}, function(start, end) { 
-			setRange(start, end);
+			scope.$apply(function() { setRange(start, end); });
 		});
 
 		setRange(eventRange.start, eventRange.end);
