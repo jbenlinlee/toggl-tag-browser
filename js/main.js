@@ -109,8 +109,14 @@ tagBrowserModule.
 			chrome.runtime.sendMessage(msg, function(response) {
 					console.log('Got ' + response.entries.length + ' entries');
 					$scope.$apply(function() {
-						$scope.activeEntries = response.entries;
-						$scope.filteredEntries = $scope.activeEntries;
+						$scope.activeEntries = [];
+						response.entries.forEach(function(entry) {
+							entryStart = moment(entry.start);
+
+							if (entry.duration > 0 && entryStart >= $scope.startDate.valueOf() && entryStart <= $scope.endDate.valueOf()) {
+								$scope.activeEntries.push(entry);
+							}
+						});
 					});
 				});
 		}
