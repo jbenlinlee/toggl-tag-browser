@@ -27,7 +27,16 @@ angular.module('toggl-tag-browser', []).
 			chrome.runtime.sendMessage(msg, function(response) {
 					console.log('Got ' + response.entries.length + ' entries');
 					$scope.$apply(function() {
-						$scope.activeEntries = response.entries;
+						$scope.activeEntries = [];
+						response.entries.forEach(function(entry) {
+							entryStart = moment(entry.start);
+							entryStart.local();
+
+							if (entryStart.valueOf() > $scope.startDate.valueOf() && entryStart.valueOf() < $scope.endDate.valueOf() && entry.duration > 0) {
+								$scope.activeEntries.push(entry);
+							}
+						});
+
 						$scope.filteredEntries = $scope.activeEntries;
 					});
 				});
@@ -246,7 +255,8 @@ angular.module('toggl-tag-browser', []).
 			var tagData = $scope.filteredTagTimeSeries[tag];
 
 			if (tag !== undefined && divElem && tagData !== undefined) {
-				console.log("Rendering duration share for " + tag + " into " + plotdiv);
+				console.debug("Rendering duration share for " + tag + " into " + plotdiv);
+				console.debug(tagData);
 
 				var plotData = [
 					{label:tag, data:tagData.durationShare},
@@ -268,8 +278,10 @@ angular.module('toggl-tag-browser', []).
 					}});
 
 				var popupText = Math.floor(tagData.durationShare * 100) + "%; " + moment.duration(tagData.duration * 1000).humanize();
+				console.debug("Popup text should be " + popupText);
 
-				$(divElem).tooltip({title:popupText, placement:"right"});
+				$(divElem).tooltip({placement:"right"});
+				$(divElem).data('bs.tooltip').options.title = popupText;
 			}
 		}
 
